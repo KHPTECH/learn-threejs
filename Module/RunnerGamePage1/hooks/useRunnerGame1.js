@@ -72,17 +72,45 @@ export const useRunnerGame1 = () => {
             box.depth = depth;
 
             box.position.set(position.x, position.y, position.z)
+
+            box.right = box.position.x + box.width / 2
+            box.left = box.position.x - box.width / 2
+
             box.bottom = box.position.y - box.height / 2
             box.top = box.position.y + box.height / 2
+
+            box.front = box.position.z + box.depth / 2
+            box.back = box.position.z - box.depth / 2
 
             box.velocity = velocity
             box.gravity = -0.002
 
-            box.update = (ground) => {
+            const updateSides = () => {
+                box.right = box.position.x + box.width / 2
+                box.left = box.position.x - box.width / 2
+
                 box.bottom = box.position.y - box.height / 2
                 box.top = box.position.y + box.height / 2
+
+                box.front = box.position.z - box.depth / 2
+                box.back = box.position.z + box.depth / 2
+            }
+
+            box.update = (ground) => {
+                updateSides()
+
                 box.position.x += box.velocity.x
                 box.position.z += box.velocity.z
+
+                const xCollision = box.right >= ground.left && box.left <= ground.right
+                const zCollision = box.front >= ground.back && box.back <= ground.front
+                const yCollision = box.bottom <= ground.top && box.top >= ground.bottom
+                // detect gravity
+
+                if (xCollision && zCollision && yCollision) {
+                    console.log("colliision", box.front, ground.back, box.front >= ground.back);
+                }
+
                 applyGravity()
             }
             const applyGravity = () => {
@@ -112,7 +140,7 @@ export const useRunnerGame1 = () => {
 
         cube.castShadow = true
         scene.add(cube)
-        console.log(cube.height);
+        // console.log(cube.height);
 
         //ground
         const ground = createBox({
@@ -167,7 +195,6 @@ export const useRunnerGame1 = () => {
 
         //keyboard input event
         window.addEventListener('keydown', (e) => {
-            console.log(e.code);
             switch (e.code) {
                 case "ArrowLeft":
                     keys.a.pressed = true
@@ -187,7 +214,6 @@ export const useRunnerGame1 = () => {
         })
 
         window.addEventListener('keyup', (e) => {
-            console.log(e.code);
             switch (e.code) {
                 case "ArrowLeft":
                     keys.a.pressed = false
